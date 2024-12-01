@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  zenoh:
+    image: docker.io/eclipse/zenoh:latest
+    container_name: zenoh
+    ports:
+      - "7447:7447"
+      - "8000:8000"
+    networks:
+      - zenoh-network
+    restart: unless-stopped
+    environment:
+      - ZENOH_HOME=/zenoh
+      - ZENOH_STORAGE=/zenoh/storage
+    volumes:
+      - zenoh-data:/zenoh/storage
+
+  flask-app:
+    container_name: flask-server
+    build:
+      context: ./flask_server
+      dockerfile: Containerfile
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      - ZENOH_SUBSCRIBE_KEY=demo/example/zenoh_sub
+      - ZENOH_PUBLISH_KEY=demo/example/zenoh_pub
+
+networks:
+  zenoh-network:
+    driver: bridge
+
+volumes:
+  zenoh-data:
+    driver: local

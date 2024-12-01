@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IHM Estufa Inteligente</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>IHM Estufa Inteligente</h1>
+
+    <!-- Seção de Temperatura -->
+    <div class="section">
+      <div class="card">
+        <h2>Temperatura Atual</h2>
+        <div id="temp-atual">25°C</div>
+      </div>
+      <div class="card">
+        <h2>Definir Temperatura</h2>
+        <div class="slider-container">
+          <input type="range" min="0" max="50" value="25" class="slider" id="temp-slider">
+          <span id="temp-display">25°C</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Seção de Umidade -->
+    <div class="section">
+      <div class="card">
+        <h2>Umidade Atual</h2>
+        <div id="umidade-atual">60%</div>
+      </div>
+      <div class="card">
+        <h2>Definir Umidade</h2>
+        <div class="slider-container">
+          <input type="range" min="0" max="100" value="60" class="slider" id="umidade-slider">
+          <span id="umidade-display">60%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Seção de Lâmpada -->
+    <div class="section">
+      <div class="card">
+        <h2>Status da Lâmpada</h2>
+        <div id="lampada-status" class="status-indicator">Desligada</div>
+      </div>
+    </div>
+
+    <!-- Seção de Ventilação -->
+    <div class="section">
+      <div class="card">
+        <h2>Velocidade do Fan</h2>
+        <div id="fan-velocidade">70%</div>
+      </div>
+      <div class="card">
+        <h2>Definir Velocidade do Fan</h2>
+        <div class="slider-container">
+          <input type="range" min="0" max="100" value="70" class="slider" id="fan-slider">
+          <span id="fan-display">70%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const eventSource = new EventSource('http://127.0.0.1:5000/events');
+    
+    eventSource.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      console.log(data);
+
+      const currentTemp = document.getElementById("temp-atual");
+      currentTemp.innerHTML = `${data.temperature}°C`;
+
+      const currentHum = document.getElementById("umidade-atual");
+      currentHum.innerHTML = `${data.humidity}%`
+
+      const lightStatus = document.getElementById("lampada-status");
+      let status = data.lightStatus;
+
+      if(status) {
+        lightStatus.classList.remove("status-off");
+        lightStatus.classList.add("status-on");
+        lightStatus.innerHTML = "Ligada";
+      } else {
+        lightStatus.classList.remove("status-on");
+        lightStatus.classList.add("status-off");
+        lightStatus.innerHTML = "Desligada";
+      }
+
+      const fanSpeed = document.getElementById("fan-velocidade");
+      fanSpeed.innerHTML = `${data.fanSpeed}%`
+    }
+
+    eventSource.onerror = () => {
+      console.error("EventSource connection lost...");
+      eventSource.close();
+    }
+
+    // Função para enviar os dados ao backend
+    const sendUpdate = (data) => {
+      fetch('http://127.0.0.1:5000/update', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      })
+        .then((response) => response.json())
+        .then((result) => {
+          console.log('Update sent successfully:', result);
+        })
+        .catch((error) => {
+          console.error('Error sending update:', error);
+        });
+    };
+
+    // Atualização de Sliders e Envio de Dados
+    const tempSlider = document.getElementById("temp-slider");
+    const tempDisplay = document.getElementById("temp-display");
+    tempSlider.addEventListener("input", () => {
+      const value = tempSlider.value;
+      tempDisplay.textContent = `${value}°C`;
+      sendUpdate({ temperature: parseInt(value) });
+    });
+
+    const umidadeSlider = document.getElementById("umidade-slider");
+    const umidadeDisplay = document.getElementById("umidade-display");
+    umidadeSlider.addEventListener("input", () => {
+      const value = umidadeSlider.value;
+      umidadeDisplay.textContent = `${value}%`;
+      sendUpdate({ humidity: parseInt(value) });
+    });
+
+    const fanSlider = document.getElementById("fan-slider");
+    const fanDisplay = document.getElementById("fan-display");
+    fanSlider.addEventListener("input", () => {
+      const value = fanSlider.value;
+      fanDisplay.textContent = `${value}%`;
+      sendUpdate({ fanSpeed: parseInt(value) });
+    });
+  </script>
+
+</body>
+</html>
