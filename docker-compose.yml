@@ -1,6 +1,8 @@
 version: '3.8'
 
 services:
+
+# zenohd
   zenoh:
     image: docker.io/eclipse/zenoh:latest
     container_name: zenoh
@@ -16,6 +18,7 @@ services:
     volumes:
       - zenoh-data:/zenoh/storage
 
+# Flask Server (SSE)
   flask-app:
     container_name: flask-server
     build:
@@ -27,10 +30,35 @@ services:
       - ZENOH_SUBSCRIBE_KEY=demo/example/zenoh_sub
       - ZENOH_PUBLISH_KEY=demo/example/zenoh_pub
 
+# SQL (Postgres)
+  postgres:
+    image: docker.io/postgres:latest
+    container_name: postgres
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: estufa
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./init_scripts:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+
+# # IHM
+#   ihm:
+#     container_name: ihm
+#     build:
+#       context: "/home/nicolas/Estufa"
+#       dockerfile: Containerfile
+#     network_mode: host
+#     restart: unless-stopped
+
 networks:
   zenoh-network:
     driver: bridge
 
 volumes:
   zenoh-data:
+    driver: local
+  postgres-data:
     driver: local

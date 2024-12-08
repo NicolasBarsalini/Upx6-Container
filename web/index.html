@@ -20,8 +20,8 @@
       <div class="card">
         <h2>Definir Temperatura</h2>
         <div class="slider-container">
-          <input type="range" min="0" max="50" value="25" class="slider" id="temp-slider">
-          <span id="temp-display">25°C</span>
+          <input type="range" min="0" max="50" value="0" class="slider" id="temp-slider">
+          <span id="temp-display">0°C</span>
         </div>
       </div>
     </div>
@@ -35,8 +35,8 @@
       <div class="card">
         <h2>Definir Umidade</h2>
         <div class="slider-container">
-          <input type="range" min="0" max="100" value="60" class="slider" id="umidade-slider">
-          <span id="umidade-display">60%</span>
+          <input type="range" min="0" max="100" value="0" class="slider" id="umidade-slider">
+          <span id="umidade-display">0%</span>
         </div>
       </div>
     </div>
@@ -58,8 +58,8 @@
       <div class="card">
         <h2>Definir Velocidade do Fan</h2>
         <div class="slider-container">
-          <input type="range" min="0" max="100" value="70" class="slider" id="fan-slider">
-          <span id="fan-display">70%</span>
+          <input type="range" min="0" max="100" value="0" class="slider" id="fan-slider">
+          <span id="fan-display">0%</span>
         </div>
       </div>
     </div>
@@ -67,21 +67,44 @@
 
   <script>
     const eventSource = new EventSource('http://127.0.0.1:5000/events');
-    
+
     eventSource.onmessage = (event) => {
       const data = JSON.parse(event.data);
       console.log(data);
 
+      // Verifica se o JSON contém "status" e "message"
+      if (data.status === "completed" && data.message === "Process finished") {
+        window.alert("Processo concluído com sucesso!");
+
+        // Reseta os sliders e exibições
+        document.getElementById("temp-slider").value = 0;
+        document.getElementById("temp-display").innerHTML = "0°C";
+
+        document.getElementById("umidade-slider").value = 0;
+        document.getElementById("umidade-display").innerHTML = "0%";
+
+        document.getElementById("fan-slider").value = 0;
+        document.getElementById("fan-display").innerHTML = "0%";
+
+        // Opcional: enviar um reset ao backend para sincronizar estados
+        sendUpdate({
+          temperature: null,
+          humidity: null,
+          fanSpeed: null,
+        });
+      }
+
+      // Atualiza os valores recebidos em tempo real
       const currentTemp = document.getElementById("temp-atual");
-      currentTemp.innerHTML = `${data.temperature}°C`;
+      currentTemp.innerHTML = `${parseFloat(data.temperature).toFixed(2)}°C`;
 
       const currentHum = document.getElementById("umidade-atual");
-      currentHum.innerHTML = `${data.humidity}%`
+      currentHum.innerHTML = `${parseFloat(data.humidity).toFixed(2)}%`;
 
       const lightStatus = document.getElementById("lampada-status");
       let status = data.lightStatus;
 
-      if(status) {
+      if (status) {
         lightStatus.classList.remove("status-off");
         lightStatus.classList.add("status-on");
         lightStatus.innerHTML = "Ligada";
@@ -92,13 +115,13 @@
       }
 
       const fanSpeed = document.getElementById("fan-velocidade");
-      fanSpeed.innerHTML = `${data.fanSpeed}%`
-    }
+      fanSpeed.innerHTML = `${parseFloat(data.fanSpeed).toFixed(2)}%`;
+    };
 
     eventSource.onerror = () => {
       console.error("EventSource connection lost...");
       eventSource.close();
-    }
+    };
 
     // Função para enviar os dados ao backend
     const sendUpdate = (data) => {
@@ -122,25 +145,25 @@
     const tempSlider = document.getElementById("temp-slider");
     const tempDisplay = document.getElementById("temp-display");
     tempSlider.addEventListener("input", () => {
-      const value = tempSlider.value;
-      tempDisplay.textContent = `${value}°C`;
-      sendUpdate({ temperature: parseInt(value) });
+      const value = parseFloat(tempSlider.value); // Converte para número
+      tempDisplay.innerHTML = `${value.toFixed(2)}°C`; // Exibe com 2 casas decimais
+      sendUpdate({ temperature: value }); // Envia como número
     });
 
     const umidadeSlider = document.getElementById("umidade-slider");
     const umidadeDisplay = document.getElementById("umidade-display");
     umidadeSlider.addEventListener("input", () => {
-      const value = umidadeSlider.value;
-      umidadeDisplay.textContent = `${value}%`;
-      sendUpdate({ humidity: parseInt(value) });
+      const value = parseFloat(umidadeSlider.value); // Converte para número
+      umidadeDisplay.textContent = `${value.toFixed(2)}%`; // Exibe com 2 casas decimais
+      sendUpdate({ humidity: value }); // Envia como número
     });
 
     const fanSlider = document.getElementById("fan-slider");
     const fanDisplay = document.getElementById("fan-display");
     fanSlider.addEventListener("input", () => {
-      const value = fanSlider.value;
-      fanDisplay.textContent = `${value}%`;
-      sendUpdate({ fanSpeed: parseInt(value) });
+      const value = parseFloat(fanSlider.value); // Converte para número
+      fanDisplay.textContent = `${value.toFixed(2)}%`; // Exibe com 2 casas decimais
+      sendUpdate({ fanSpeed: value }); // Envia como número
     });
   </script>
 
