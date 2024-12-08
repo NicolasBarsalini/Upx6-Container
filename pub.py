@@ -2,7 +2,9 @@ import zenoh
 import json
 import time
 
-json_data = {"temperature": 38, "humidity": 20, "fanSpeed": 100, "lightStatus": False}
+json_data = {"temperature": 50, "humidity": 15, "fanSpeed": 56, "lightStatus": True}
+
+# json_data = {"status" : "completed", "message" : "Process finished!"}
 
 json_dumps = json.dumps(json_data)
 
@@ -14,4 +16,4 @@ if __name__ == "__main__":
         buf = f"{json_dumps}"
         print(f"Putting Data ('{key}': '{buf}')...")
         pub.put(buf)
-        time.sleep(1)
+        time.sleep(3)
