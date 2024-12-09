@@ -1,19 +1,26 @@
 import zenoh
 import json
 import time
-
-json_data = {"temperature": 50, "humidity": 15, "fanSpeed": 56, "lightStatus": True}
+import random
 
 # json_data = {"status" : "completed", "message" : "Process finished!"}
-
-json_dumps = json.dumps(json_data)
 
 if __name__ == "__main__":
     session = zenoh.open(zenoh.Config())
     key = 'demo/example/zenoh_sub'
     pub = session.declare_publisher(key)
+
     while True:
+        json_data = {
+            "temperature": random.randint(0, 50),
+            "humidity": random.randint(30, 100),
+            "fanSpeed": random.randint(0, 100),
+            "lightStatus": random.choice([True, False])
+        }
+
+        json_dumps = json.dumps(json_data)
+
         buf = f"{json_dumps}"
         print(f"Putting Data ('{key}': '{buf}')...")
         pub.put(buf)
-        time.sleep(3)
+        time.sleep(5)
