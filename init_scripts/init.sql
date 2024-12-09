@@ -26,7 +26,7 @@ RETURNS TRIGGER AS $$
 BEGIN
     -- Verificar o último timestamp na tabela
     IF EXISTS (SELECT 1 FROM estufa_data WHERE (NOW() - timestamp) < interval '5 minutes') THEN
-        RAISE EXCEPTION 'Cannot insert data: less than 10 minutes since the last entry.';
+        RAISE EXCEPTION 'Cannot insert data: less than 5 minutes since the last entry.';
     END IF;
 
     -- Permitir a inserção se a condição for atendida

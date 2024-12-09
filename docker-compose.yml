@@ -30,6 +30,17 @@ services:
       - ZENOH_SUBSCRIBE_KEY=demo/example/zenoh_sub
       - ZENOH_PUBLISH_KEY=demo/example/zenoh_pub
 
+# Database Service (Graph Data)
+  db-service:
+    container_name: db-service
+    build:
+      context: ./database_connection
+      dockerfile: Containerfile
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      - KEY=demo/example/zenoh_sub
+
 # SQL (Postgres)
   postgres:
     image: docker.io/postgres:latest
