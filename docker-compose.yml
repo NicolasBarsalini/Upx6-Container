@@ -40,6 +40,8 @@ services:
     restart: unless-stopped
     environment:
       - KEY=demo/example/zenoh_sub
+    depends_on:
+    - postgres
 
 # SQL (Postgres)
   postgres:

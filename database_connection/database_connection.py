@@ -48,14 +48,17 @@ def insert_information_into_database(data):
         """
         cursor.execute(insert_query, (temperature,
                        humidity, fan_speed, light_status))
+
         connection.commit()
         print("Data inserted successfully!")
+
     except psycopg2.errors.RaiseException as e:
         print(f"Error inserting information into database: {e}")
         connection.rollback()
+
     except Exception as e:
         print(f"Error inserting information into database: {e}")
-
+        connection.rollback()
 
 def listener(sample):
     payload = bytes(sample.payload).decode('utf-8')
@@ -64,8 +67,6 @@ def listener(sample):
     insert_information_into_database(data)
 
 # Rota para buscar os últimos dados
-
-
 @app.route('/get_graph_data', methods=['GET'])
 def get_graph_data():
     global cursor
@@ -97,6 +98,7 @@ def get_graph_data():
             return jsonify({"error": "No data available"}), 404
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 if __name__ == "__main__":
     # Conectar ao banco de dados
