@@ -75,7 +75,8 @@ def get_graph_data():
         select_query = """
             SELECT *
             FROM estufa_data
-            ORDER BY timestamp DESC;
+            ORDER BY timestamp DESC
+            LIMIT 10;
         """
         cursor.execute(select_query)
         results = cursor.fetchall()  # Pega todos os registros

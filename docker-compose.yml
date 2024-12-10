@@ -58,13 +58,15 @@ services:
       - "5432:5432"
 
 # # IHM
-#   ihm:
-#     container_name: ihm
-#     build:
-#       context: "/home/nicolas/Estufa"
-#       dockerfile: Containerfile
-#     network_mode: host
-#     restart: unless-stopped
+  # ihm:
+  #   container_name: ihm
+  #   build:
+  #     context: "/home/nicolas/Estufa"
+  #     dockerfile: Containerfile
+  #   network_mode: host
+  #   restart: unless-stopped
+  #   ports:
+  #     - "5173":"5173"
 
 networks:
   zenoh-network:
